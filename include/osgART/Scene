@@ -1,0 +1,171 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  Scene
+ *  \brief High level control of your AR workflow
+ *
+ *  High level control of your AR workflow for rapid development of AR Applications.
+ */
+
+#ifndef OSGART_SCENE
+#define OSGART_SCENE 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osg/Camera>
+
+// local include
+#include "osgART/Export"
+
+#include "osgART/Sensor"
+//#include "osgART/GPSSensor"
+//#include "osgART/InertialSensor"
+#include "osgART/Video"
+#include "osgART/Tracker"
+#include "osgART/VisualTracker"
+#include "osgART/GPSInertialTracker"
+
+#include "osgART/SensorData"
+#include "osgART/VideoStream"
+#include "osgART/Target"
+
+#include "osgART/SensorConfiguration"
+#include "osgART/VideoConfiguration"
+#include "osgART/CameraConfiguration"
+#include "osgART/TrackerConfiguration"
+
+
+
+namespace osgART {
+
+	class Scene;
+
+	class OSGART_EXPORT SceneSetting {
+	public:
+
+		friend class Scene;
+
+		SceneSetting();
+
+		SceneSetting& setTargetActive(bool active);
+
+		SceneSetting& useTextureRectangle(bool use = true);
+
+	protected:
+
+		bool _default_active;
+		bool _use_texturerect;
+
+		int _background_renderbin;
+		std::string _videoplugin;
+		std::string _trackerplugin;
+
+	};
+
+	class OSGART_EXPORT Scene : public osg::Group {
+	public:
+
+		/**
+		 * Scene is the grand master class of osgART. In basic
+		 * applications it should be the only thing needed to
+		 * create an AR application.
+		 *
+		 * \code
+		 * osgART::Scene* scene = new osgART::Scene();
+         * scene->addVideo("osgart_artoolkit","osgart_video_artoolkit");
+		 * scene->addVisualTracker("osgart_artoolkit","osgart_tracker_artoolkit");
+         * scene->addTrackedTransform("single;data/artoolkit/patt.hiro;80;0;0")->addChild(osgART::createTopCube(80));
+		 *
+		 */
+		Scene();
+
+
+		/** Copy constructor using CopyOp to manage deep vs shallow copy. */
+		Scene(const Scene&,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY);
+
+		META_Node(osgART, Scene)
+
+		virtual Scene* asScene() { return this; }
+		virtual const Scene* asScene() const { return this; }
+
+
+        Video* addVideo(const std::string& pluginName,
+                        const std::string& videoInterfaceName,
+                        std::string videoconfigfile="");
+
+
+		Tracker* addVisualTracker(const std::string& tplugin, const std::string& t, std::string cameracalibconfigfile="", std::string trackerconfigfile="");
+        //Tracker* addInertialTracker
+        //Tracker* addGPSInertialTracker
+
+//      Video* addVideoConfig(const std::string& vplugin, const std::string& v,VideoConfiguration& vconfig);
+//		Tracker* addVisualTrackerConfig(const std::string& tplugin, const std::string& t,CameraConfiguration& camconfig, VideoConfiguration& config);
+
+		Target* addTarget(const std::string& cfg);
+        osg::MatrixTransform* addTrackedTransform(const std::string& cfg);
+
+        osg::MatrixTransform* addTrackedTransform(Target *target);
+
+        inline const Target* getTarget(size_t id=0) const {
+            return _tracker->getTarget(id);
+        }
+
+        inline const VideoStream* getVideoStream() const {
+            return _video->getStream();
+        }
+
+        inline osg::Camera* getCamera() const {
+            return _camera.get();
+        }
+
+        inline const Tracker* getTracker() const {
+			return _tracker.get();
+		}
+
+        inline const Video* getVideo() const {
+			return _video.get();
+		}
+
+        inline SceneSetting& getSetting() { return _settings; }
+
+	protected:
+
+		virtual ~Scene();
+
+		SceneSetting _settings;
+
+		osg::ref_ptr<osgART::VideoLayer> _videoBackground;
+		osg::ref_ptr<osgART::Tracker> _tracker;
+		osg::ref_ptr<osgART::Video> _video;
+		osg::ref_ptr<osg::Camera> _camera;
+		osg::ref_ptr<osgART::CameraConfiguration> _cameraconfiguration;
+
+		void configureVideoBackground();
+
+	};
+
+
+}
+
+#endif  // OSGART_SCENE

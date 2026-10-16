@@ -1,0 +1,154 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2013 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  VideoImageStream
+ *  \brief Extension of osg::ImageStream with additional features
+ * 
+ * Extension of osg::ImageStream with additional features
+ **/
+
+#ifndef OSGART_VIDEOIMAGESTREAM
+#define OSGART_VIDEOIMAGESTREAM 1
+
+// OSG include
+#include <osg/Version>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/ImageStream>
+#include <osg/Stats>
+
+// Local include
+#include "osgART/Export"
+
+namespace osgART {
+
+
+	class OSGART_EXPORT VideoImageStream : public osg::ImageStream
+	{	
+	public:
+	
+		/** Constructor */
+		VideoImageStream();
+		
+        /** Copy constructor using CopyOp to manage deep vs shallow copy. */
+        VideoImageStream(const VideoImageStream& image, 
+			const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY);
+
+        virtual osg::Object* cloneType() const 
+        { 
+			return new VideoImageStream(); 
+		}
+        
+        virtual osg::Object* clone(const osg::CopyOp& copyop) const 
+        { 
+			return new VideoImageStream(*this,copyop); 
+		}
+			
+        virtual bool isSameKindAs(const osg::Object* obj) const 
+        {
+			return dynamic_cast<const VideoImageStream*>(obj) != 0; 
+		}
+        
+        virtual const char* libraryName() const 
+        {
+			return "osgART"; 
+		}
+        
+        virtual const char* className() const 
+        {
+			return "VideoImageStream";
+		}			
+		
+		
+		/**
+		 * \brief start the  video stream grabbing.
+		 * Start to get image from the  video stream. In function of the implementation on different
+		 * platform, this function can run a thread, signal or real-time function. 
+		 */
+		virtual void start();
+		
+		/**
+		 * \brief stop the  video stream grabbing.
+		 * Stop to get image from the  video stream. In function of 
+		 * the implementation on different platform, this function can 
+		 * stop a thread, signal or real-time function. 
+		 */
+		virtual void stop();
+		
+		/**
+		 * \brief open the Video stream.
+		 * Access the Video stream (hardware or file) and get an handle on it.
+		 */		
+		virtual bool open();
+				
+		/**
+		 * \brief close the video stream.
+		 * Terminate the connection with the video stream and 
+		 * clean handle.
+		 */	
+		virtual void close(bool waitForThread = true);
+		
+		
+		
+#if (OPENSCENEGRAPH_SOVERSION <= 41)
+
+		/** 
+		 * This is a proxy method overiding ImageStream::update() for older 
+		 * OpenSceneGraph versions
+		 */
+		inline virtual void update()
+		{
+			this->update(0);
+		}
+
+		/**
+		 * Additionally we proxy the new API of OpenSceneGraph introduced 
+		 * around version 2.5.6
+		 */
+		inline virtual void update(osg::NodeVisitor* nv) 
+		{			
+		}		
+#endif
+		/**
+		 * Returns stats for the Video capture
+		 *
+		 * \return pointer to the stats connected to the video
+		 */		 
+		inline osg::Stats* getStats() { return _stats.get(); };
+		
+		/**
+		 * Set the stats for the Video capture
+		 *
+		 * \param stats pointer to the stats capturing timings
+		 */		 		
+		inline void setStats(osg::Stats* stats) { _stats = stats; } ;
+		
+	protected:
+	
+		osg::ref_ptr<osg::Stats> _stats;
+	
+		virtual ~VideoImageStream();
+		
+		
+	};
+	
+
+}
+
+#endif // OSGART_VIDEOSTREAM

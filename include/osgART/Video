@@ -1,0 +1,158 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+ /**
+ *  \file  Video
+ *  \brief video class
+ *
+ * A Video is a class generating image content.
+ */
+
+#ifndef OSGART_VIDEO
+#define OSGART_VIDEO 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/ref_ptr>
+#include <osg/Image>
+#include <osg/ImageStream>
+#include <osg/Object>
+
+// local include
+#include "osgART/Export"
+#include "osgART/Object"
+#include "osgART/Event"
+#include "osgART/Field"
+
+#include "osgART/VideoStream"
+#include "osgART/VideoConfiguration"
+#include "osgART/VideoGeode"
+#include "osgART/Field"
+
+
+
+namespace osgART {
+	/**
+	 * Video encapsulates different capturing devices and sources. 
+	 * 
+	 */	
+	class OSGART_EXPORT Video : public osgART::Object,
+								public FieldContainer<Video>
+	{
+	public:
+
+		META_Object(osgART,Video);
+	
+		/** 
+		 * Default constructor. Initializes also the FieldContainer 
+		 * explicitly.
+		 */
+		Video();
+	    
+		/** 
+		 * Copy constructor. Needed for cloning in OSG
+		 */
+		Video(const Video& container,
+			const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+	    
+		/** 
+		 * \brief assignemnt operator.
+		 *
+		 */
+		Video& operator = (const Video &);
+		
+		/**
+		 * Needed for plugin loaded objects which are used in other
+		 * languages which don't support dynamic casting (e.g. Python)
+		 * \param instance instance to be casted (by a tracker)
+		 * \return 0 if can't cast otherwise correctly typed instance
+		 */
+		static Video* cast(osg::Referenced* instance);
+			
+		/**
+		 * Access a field by its name. You need to cast
+		 * the field into its respective type in order
+		 * to access it.
+		 * \param name Name of the field
+		 * \return pointer to the field (0L if not found)
+		 */
+		Field* get(const std::string& name);
+		
+		/**
+		 * Get the video configuration struct
+		 * \return struct VideoConfiguration
+		 */
+		virtual VideoConfiguration* getOrCreateConfiguration();
+		
+		/**
+		 * Set the video configuration struct
+		 * \param VideoConfiguration video configuration
+		*/
+		virtual void setConfiguration(VideoConfiguration* config);		 
+		 
+		/**
+		 * return a video stream
+		 * \param stream identification
+		*/
+		virtual VideoStream* getStream(size_t idx=0);
+		
+		inline size_t
+		getVideoStreamtNum() const { return _videoStreamList.size(); }
+		 
+		/**
+		 * Set internal flipping. 
+		 * \param horizontal switch on and off horizontal flipping
+		 * \param vertical switch on and off vertical flipping
+		 */
+		void setFlip(bool horizontal, bool vertical);
+		
+	protected:
+	
+		/** 
+		 * \brief destructor.
+		 *
+		 */
+		virtual ~Video();   
+	
+		/**
+		 * type for a vector of reference counted targets.
+		 */
+        typedef std::vector< osg::ref_ptr<VideoStream> > VideoStreamListType;
+
+		/**
+		 * A list of video stream associated with this video.
+		 */
+		VideoStreamListType _videoStreamList;
+
+		/**
+		 * Video Configuration object that encapsulates the initialization parameters.
+		 */
+		osg::ref_ptr<VideoConfiguration> _videoConfiguration;
+			
+		bool _verticalFlip;
+		bool _horizontalFlip;
+	
+	}; // class Video
+
+	
+}; // namespace osgART
+
+#endif //  OSGART_VIDEO

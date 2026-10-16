@@ -1,0 +1,171 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  Event
+ *  \brief Handle event-driven communication for inter-thread, inter-process. 
+ *
+ * Handle event-driven communication for inter-thread, inter-process.
+ */
+
+#ifndef OSGART_EVENT
+#define OSGART_EVENT 1
+
+// std include
+#include <vector>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Referenced>
+#include <osg/Timer>
+
+// local include
+#include "osgART/Export"
+
+
+
+namespace osgART {
+
+	class EventHandler;
+
+
+	/**
+	* Base class for event handling
+	*
+	*/
+	class OSGART_EXPORT Event {
+	protected:
+
+        bool _handled;
+        osg::Timer_t _tick;
+
+        unsigned long _id;
+
+	public:
+
+		/** Default c'tor */
+		Event();
+
+		/** Copy c'tor */
+		Event(const Event& e);
+
+		/** Assignment operator */
+		Event& operator = (const Event& e);
+
+		/** D'tor */
+		virtual ~Event();
+
+        void setId(unsigned long id) { _id = id; }
+        unsigned long getId() { return _id; }
+
+		inline void
+        setHandled(bool handled = true) { _handled = handled; }
+
+		inline bool
+        getHandled() const { return _handled; }
+
+	};
+
+	/**
+	 * Event proxy handles event forwarding and dispatch
+	 */
+	struct OSGART_EXPORT EventProxy {
+
+		virtual void call(EventHandler*, Event&) = 0;
+		virtual bool corresponds(Event& e) const = 0;
+
+		virtual ~EventProxy() {}
+	};
+
+	/**
+	 * Dispatches the event to a function
+	 */
+	template <typename EventType>
+	struct EventFunctionProxy : EventProxy {
+
+        void (*_handler)(EventType& e);
+
+        EventFunctionProxy(void (*f)(EventType& e)) : _handler(f) {}
+
+		virtual void call(EventHandler*, Event& e) {
+            _handler(static_cast<EventType&>(e));
+		}
+
+		virtual bool corresponds(Event &e) const { return (0 != dynamic_cast<EventType*>(&e)); }
+
+	};
+
+	/**
+	 * Dispatches the event to a functor in a class
+	 */
+	template <typename EventType,typename EventClass>
+	struct EventFunctorProxy : EventProxy {
+
+		typedef void (EventClass::*EventCallback)(EventType&);
+
+        EventCallback _handler;
+        EventClass* _object;
+
+		inline
+		EventFunctorProxy(EventCallback method,EventClass* o)
+            : _handler(method)
+            , _object(o)
+		{}
+
+		virtual void call(EventHandler* h, Event& e) {
+            (_object->*_handler)(static_cast<EventType&>(e));
+		}
+
+		virtual bool corresponds(Event &e) const { return (0 != dynamic_cast<EventType*>(&e)); }
+
+	};
+
+
+	class OSGART_EXPORT EventHandler {
+	protected:
+
+		typedef std::vector<EventProxy*> EventProxyArray;
+		EventProxyArray mHandlers;
+
+	public:
+
+		template <typename EventType>
+		void attach(void (*f)(EventType& e))
+		{
+			mHandlers.push_back(new EventFunctionProxy<EventType>(f));
+		}
+
+		template <typename EventType,typename EventClass>
+		void attach(EventClass* o,void (EventClass::*f)(EventType& e))
+		{
+			mHandlers.push_back(new EventFunctorProxy<EventType,EventClass>(f,o));
+		}
+
+		bool process(Event &e);
+
+		void removeAll();
+
+		~EventHandler();
+
+	};
+
+
+} //namespace osgART
+
+#endif // OSGART_EVENT

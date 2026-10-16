@@ -1,0 +1,174 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  VideoConfiguration
+ *  \brief Types used in defining configuration of video data
+ *
+ * Types used in defining configuration of video data.
+ */
+
+#ifndef OSGART_VIDEOCONFIGURATION
+#define OSGART_VIDEOCONFIGURATION 1
+
+// std include
+#include <string>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Referenced>
+#include <osg/Vec2s>
+
+// local include
+#include "osgART/Export"
+
+namespace osgART {
+
+	/** 
+	* \brief Pixel Format type 
+	*
+	*/
+	typedef enum {
+		VIDEOFORMAT_UNDEFINED = -1,
+		VIDEOFORMAT_ANY = 0x0,
+		VIDEOFORMAT_RGB555,
+		VIDEOFORMAT_RGB565,
+		VIDEOFORMAT_RGB24,		// GL_RGB, GL_UNSIGNED_BYTE
+		VIDEOFORMAT_BGR24,		// GL_BGR, GL_UNSIGNED_BYTE
+		VIDEOFORMAT_RGBA32,		// GL_RGBA, GL_UNSIGNED_BYTE
+		VIDEOFORMAT_BGRA32,		// GL_BGRA, GL_UNSIGNED_BYTE (Win 32 native)
+		VIDEOFORMAT_ARGB32,		// GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV (BE) or GL_UNSIGNED_INT_8_8_8_8 (LE) (Mac OS native)
+		VIDEOFORMAT_ABGR32,		// GL_ABGR_EXT, GL_UNSIGNED_BYTE (SGI native)
+		VIDEOFORMAT_Y8,			// GL_LUMINANCE, GL_UNSIGNED_BYTE
+		VIDEOFORMAT_Y16,		// GL_LUMINANCE, GL_UNSIGNED_SHORT
+		VIDEOFORMAT_YUV444,
+		VIDEOFORMAT_YUV422,
+		VIDEOFORMAT_YUV422P,
+		VIDEOFORMAT_YUV411,
+		VIDEOFORMAT_YUV411P,
+		VIDEOFORMAT_YUV420P,
+		VIDEOFORMAT_YUV410P,
+		VIDEOFORMAT_GREY8,		// GL_LUMINANCE, GL_UNSIGNED_BYTE
+		VIDEOFORMAT_MJPEG,
+		VIDEOFORMAT_422YpCbCr8,	// GL_YCBCR_422_APPLE/GL_YCBCR_MESA, GL_UNSIGNED_SHORT_8_8_REV_APPLE/GL_UNSIGNED_SHORT_8_8_REV_MESA (BE) or GL_UNSIGNED_SHORT_8_8_APPLE/GL_UNSIGNED_SHORT_8_8_MESA (LE) (Mac OS '2vuy').
+		VIDEOFORMAT_422YpCbCr8R,// GL_YCBCR_422_APPLE/GL_YCBCR_MESA, GL_UNSIGNED_SHORT_8_8_APPLE/GL_UNSIGNED_SHORT_8_8_MESA (BE) or GL_UNSIGNED_SHORT_8_8_REV_APPLE/GL_UNSIGNED_SHORT_8_8_REV_MESA (LE) (Mac OS 'yuvs'). 
+	} PixelFormatType;
+	
+	
+	/** 
+		* \brief Framerate type - define frame rate of the video flux
+		*
+		*/
+	typedef enum {
+		VIDEOFRAMERATE_ANY = 0x0,
+		VIDEOFRAMERATE_1_875,
+		VIDEOFRAMERATE_3_75,
+		VIDEOFRAMERATE_5,
+		VIDEOFRAMERATE_7_5,
+		VIDEOFRAMERATE_10,
+		VIDEOFRAMERATE_15,
+		VIDEOFRAMERATE_30,
+		VIDEOFRAMERATE_PAL,
+		VIDEOFRAMERATE_NTSC,
+		VIDEOFRAMERATE_50,	
+		VIDEOFRAMERATE_60,
+		VIDEOFRAMERATE_120,
+		VIDEOFRAMERATE_240,
+		VIDEOFRAMERATE_MAX = 0xFF // force short
+	} FrameRateType;
+	
+
+	class OSGART_EXPORT VideoConfiguration: public osg::Referenced {
+	public:
+	
+		std::string config;
+
+		int deviceid;
+		std::string devicename;
+		
+		int	width; 
+		int height;
+		float framerate;		
+		//FrameRateType framerate;
+		PixelFormatType format;
+
+		int selectedWidth;
+		int selectedHeight;
+		float selectedFrameRate;
+		PixelFormatType selectedFormat;
+	
+		VideoConfiguration();
+		virtual ~VideoConfiguration();
+		
+		virtual int getID() const { return _id; };	
+		virtual void setID(int id) {_id = id;};
+		
+		virtual const osg::Vec2s& getSize() const { return _size;};
+		virtual void setSize(const osg::Vec2s& size) {_size = size;};
+		virtual void setSize(short width, short height) { _size = osg::Vec2s(width,height);};
+
+		virtual float getFramerate() const { return _framerate;};
+		void setFrameRate(float framerate) { _framerate = framerate; };
+					
+		virtual void setPixelFormat(const std::string& fourcc);
+		virtual const std::string getPixelFormat() {return _pixelFormatfourcc;};
+	
+		virtual const std::string& getDevice() const { return _device; };
+		
+		void setDeviceName(const std::string& devicename) { _device = devicename; };
+		
+		void setDevice(int deviceid) { _deviceId = deviceid; };
+		
+		//void setDeviceUUID(const std::string& devicename) { _device = devicename; };
+		
+		//void setConfigXML(const std::string filename) {};
+		//void getConfigXML(const std::string filename) {};
+		
+		//void setConfigJSON(const std::string filename) {};
+		//void getConfigJSON(const std::string filename) {};
+		
+		//void setConfigYAML(const std::string filename) {};
+		//void getConfigYAML(const std::string filename) {};
+		
+				
+		virtual void showDeviceDialog();
+		virtual void showFormatDialog();
+		
+		
+	protected:
+
+		int _id;
+		osg::Vec2s _size;
+		float _framerate;
+	
+		std::string _device;
+		//std::string _devicename;
+		int _deviceId;
+		int _deviceUUID;
+		
+		// FrameRateType framerate;
+		std::string _pixelFormatfourcc;
+		PixelFormatType _pixelformat;
+		
+	};
+
+};
+
+
+#endif // OSGART_VIDEOCONFIGURATION

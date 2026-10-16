@@ -1,0 +1,69 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  Export
+ *  \brief Preprocessor macros to help with correct linkage of exported symbols.
+ *
+ * Preprocessor macros to help with correct linkage of exported symbols.
+ */
+
+#ifndef OSGART_EXPORT_
+#define OSGART_EXPORT_ 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Version>
+
+// local include
+
+
+#if defined(_MSC_VER)
+#if OSG_VERSION_MAJOR > 0 && OSG_VERSION_MINOR > 0
+# undef  OSGART_PIXELBIAS_NO_PERFORMANCE
+#endif
+#else 
+# define OSGART_PIXELBIAS_NO_PERFORMANCE 1
+#endif
+
+#if defined(_MSC_VER)
+#	pragma warning ( disable : 4251 )
+#endif
+
+#if defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW32__) || defined( __BCPLUSPLUS__)  || defined( __MWERKS__)
+	# if defined(OSG_LIBRARY_STATIC)
+	#    define OSGART_EXPORT
+	# elif defined(OSGART_LIBRARY)
+    #    define OSGART_EXPORT   __declspec(dllexport)
+    # else
+    #    define OSGART_EXPORT   __declspec(dllimport)
+    # endif /* OSGART_LIBRARY */
+#else
+    #  define OSGART_EXPORT
+#endif
+
+#ifdef __GNUC__
+#  if (__GNUC__ < 3)
+#    define OSGART_NO_LOCALES
+#  endif
+#endif
+
+#endif  // OSGART_EXPORT

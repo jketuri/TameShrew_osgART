@@ -1,0 +1,61 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  TrackerConfiguration
+ *  \brief Types used in defining configuration of tracker data.
+ *
+ * Types used in defining configuration of tracker data.
+ */
+
+#ifndef OSGART_TRACKERCONFIGURATION
+#define OSGART_TRACKERCONFIGURATION 1
+
+// std include
+#include <string>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Referenced>
+#include <osg/Vec2s>
+
+// local include
+#include "osgART/Export"
+
+
+
+namespace osgART {
+
+	class OSGART_EXPORT TrackerConfiguration:public osg::Referenced {
+	public:
+	
+		std::string config;
+		
+		TrackerConfiguration();
+		virtual ~TrackerConfiguration();
+
+	protected:
+			int _id;
+			
+	};
+
+};
+
+
+#endif // OSGART_TRACKERCONFIGURATION

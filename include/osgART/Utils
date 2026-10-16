@@ -1,0 +1,107 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  Utils
+ *  \brief utility class
+ *
+ * Utility class for logging, string tools, etc.
+ */
+
+#ifndef OSGART_UTILS
+#define OSGART_UTILS 1
+
+// std include
+#include <iostream>
+#include <string>
+#include <vector>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Notify>
+#include <osg/Matrix>
+#include <osg/Vec2>
+#include <osg/Texture>
+#include <osg/Texture2D>
+#include <osg/TextureRectangle>
+
+// local include
+#include "osgART/Export"
+#include "osgART/Field"
+
+
+namespace osgART {
+
+
+	template <osg::NotifySeverity severity = osg::DEBUG_INFO>
+	struct ScopedLog {
+
+		osg::NotifySeverity oldSeverity;
+
+		ScopedLog() : oldSeverity(osg::getNotifyLevel()) {
+			osg::setNotifyLevel(severity);
+		}
+
+		~ScopedLog() {
+			osg::setNotifyLevel(oldSeverity);
+		}
+
+	};
+
+
+	OSGART_EXPORT unsigned int equalOrGreaterPowerOfTwo(unsigned int x);
+	
+	OSGART_EXPORT osg::Vec2 getTextureMaxUV(const osg::Texture* texture);
+
+	OSGART_EXPORT std::string	trim		(std::string& s,const std::string& drop = " ");
+	// OSGART_EXPORT void			PrintMatrix	(std::string name, const osg::Matrix &Transform);	
+	OSGART_EXPORT osg::Matrix	GenerateMatrix	(const osg::Vec3d & _trans, const osg::Vec3d & _rot);
+	OSGART_EXPORT osg::Matrix	DiffMatrix		(const osg::Matrix & _base, const osg::Matrix & _m2);
+	// OSGART_EXPORT void			PrintVector3D	(std::string name, const osg::Vec3d &Vec3d);
+	
+	OSGART_EXPORT std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters);
+	
+#if defined(OSGART_USE_DEPRECATED)
+	template <typename ContainerType, typename ObjType> 
+		osg::ref_ptr< osgART::TypedField<ObjType> >
+		SetField(osg::ref_ptr<ContainerType> Container, std::string Name, ObjType Value, std::string ErrorMsg="", bool ExitOnerror=false)
+		{
+			osg::ref_ptr< osgART::TypedField<ObjType> > _Field = 
+					dynamic_cast< osgART::TypedField<ObjType>* >(Container->get(Name));
+			
+			if (_Field.valid())
+			{	
+				_Field->set(Value);
+			}
+			else 
+			{
+				if (ErrorMsg!= "")
+					osg::notify(osg::WARN) << ErrorMsg << std::endl;
+				if (ExitOnerror)
+					exit(-1);
+			}
+			return _Field;
+		}
+#endif
+
+
+
+};
+
+#endif // OSGART_UTILS

@@ -1,0 +1,121 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  VideoLayer
+ *  \brief Defined a Video Background Node usable for AR
+ *  \author Julian Looser Julian.Looser@hitlabnz.org
+ *  \author Raphael Grasset Raphael.Grasset@hitlabnz.org
+ *  \version 3.1
+ *  \date 01/12/07
+ *
+ * Defined an OpenSceneGraph geode for creating a VideoLayer Object.
+ * This object is combined with the VideoManager for displaying a video background
+ * using in AR Application (video see-through approach).
+ * 
+ * \remark the layer value 1 has no transparency.
+ *	
+ **/
+
+#ifndef OSGART_VIDEOLAYER
+#define OSGART_VIDEOLAYER 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Geode>
+#include <osg/Node>
+#include <osg/Group>
+#include <osg/MatrixTransform>
+#include <osg/Geometry>
+#include <osg/Projection>
+#include <osg/Camera>
+#include <osg/Image>
+
+// local include
+#include "osgART/Export"
+
+
+
+namespace osgART {
+
+	/** 
+	 * class VideoLayer.
+	 *
+	 */
+	class OSGART_EXPORT VideoLayer : public osg::Camera
+	{
+	public:        
+	    
+	    META_Node(osgART, VideoLayer)
+
+		/** 
+		 * \brief default constructor.
+		 * \param videoId the number of the video used for the background
+		 * \param layerDepth
+		 */
+		VideoLayer();			
+	
+		/**
+		 * Copy c'tor
+		 */
+		VideoLayer(const VideoLayer&, 
+			const osg::CopyOp& = osg::CopyOp::SHALLOW_COPY);
+		
+		typedef enum {VIDEO_FOREGROUND,VIDEO_BACKGROUND} LayerType;
+		
+		void setType(LayerType ltype);		
+		void setWindowSize(osg::Vec2i pos, osg::Vec2i size);
+			
+	    void setRelativeSize(osg::Vec2f pos, osg::Vec2f size, osg::Camera* main);
+	protected:
+	    
+		/**
+		 * \brief destructor.
+		 */
+		virtual ~VideoLayer();		
+
+	};
+
+	class OSGART_EXPORT VideoFlipper : public osg::MatrixTransform 
+	{
+
+	protected:
+		bool _flipH;
+		bool _flipV;
+
+		void updateFlip();
+
+	public:
+		VideoFlipper(bool flipH = false, bool flipV = false);
+
+		void setFlipH(bool flipH);
+		bool getFlipH();
+
+		void setFlipV(bool flipV);
+		bool getFlipV();
+
+	};
+
+
+
+}
+
+#endif // OSGART_VIDEOLAYER

@@ -1,0 +1,65 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  TrackerUtils
+ *  \brief utility class
+ *
+ * Utility class for logging, string tools, etc.
+ */
+
+#ifndef OSGART_TRACKERUTILS
+#define OSGART_TRACKERUTILS 1
+
+// std include
+#include <iostream>
+#include <string>
+#include <vector>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Notify>
+#include <osg/Matrix>
+#include <osg/Vec2>
+#include <osg/Texture>
+#include <osg/Texture2D>
+#include <osg/TextureRectangle>
+#include <osg/Camera>
+
+// local include
+#include "osgART/Export"
+#include "osgART/Field"
+#include "osgART/CameraConfiguration"
+
+
+namespace osgART {
+
+	/**
+		* Creates a camera with a projection matrix representing the
+		* loaded intrinsic parameters (from a Camera Configuration object)
+		*
+		* \return camera object
+		*/
+	OSGART_EXPORT osg::Camera* createBasicCamera(osgART::CameraConfiguration* calib);
+//	OSGART_EXPORT osg::Camera* createBasicCamera(osgART::CameraConfiguration* calib);
+
+//	OSGART_EXPORT osg::MatrixTransform createBasicTransform(osgART::Target* target);
+};
+
+#endif // OSGART_UTILS

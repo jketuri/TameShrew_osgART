@@ -1,0 +1,88 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  VideoUtils
+ *  \brief Video helper to create video geometry
+ *
+ * Video helper to create video geometry
+ */
+
+#ifndef OSGART_VIDEOUTILS
+#define OSGART_VIDEOUTILS 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Image>
+#include <osg/Group>
+#include <osg/Camera>
+
+// local include
+#include "osgART/Export"
+#include "osgART/CameraConfiguration"
+
+namespace osgART {
+
+	//default background in RenderBin 0
+	
+	OSGART_EXPORT osg::Group*
+	createBasicVideoBackground(osg::Image* video, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createBasicFixedVideoBackground(osg::Image* video, osg::Vec2i pos, osg::Vec2i size, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createBasicFloatingVideoBackground(osg::Image* video, osg::Vec2f pos, osg::Vec2f size, osg::Camera* main, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createUndistortVideoBackground(osg::Image* video, osgART::CameraConfiguration *config,bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createBasicVideoForeground(osg::Image* video, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createBasicFixedVideoForeground(osg::Image* video, osg::Vec2i pos, osg::Vec2i size, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createBasicFloatingVideoForeground(osg::Image* video, osg::Vec2f pos, osg::Vec2f size, osg::Camera* main, bool useTextureRectangle = false);
+
+	OSGART_EXPORT osg::Group*
+	createUndistortVideoForeground(osg::Image* video, osgART::CameraConfiguration *config,bool useTextureRectangle = false);
+
+		/**
+		 * Creates an undistorted mesh, according to the
+		 * camera lens distortion parameters known to the tracker.
+		 * \param width width of the actual video
+		 * \param height height of the actual video
+		 * \param maxU texture coordinate maximum in u direction
+		 * \param maxV texture coordinate maximum in v direction
+		 * \param geometry geometry to be filled with an
+		 * undistorted mesh
+		 */
+	/*	virtual void
+		createUndistortedMesh(int width, int height,
+			float maxU, float maxV,
+			osg::Geometry &geometry);*/
+
+}
+
+
+#endif // OSGART_VIDEOUTILS

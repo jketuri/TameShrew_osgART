@@ -1,0 +1,196 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file TargetCallback
+ *  \brief TargetCallbacks map data from a Target into the scenegraph
+ *
+ * To connect a target with a scenegraph node the node needs to support
+ * the data a specific callback will emit.
+ * \Example
+   \code
+   // create a matrix transform related to the target
+	osg::ref_ptr<osg::MatrixTransform> targetTrans =
+		new osg::MatrixTransform();
+
+	// create a visibility callback which maps visibility of the target onto a node
+	osg::NodeCallback* _cb = new osgART::TargetVisibilityCallback(target.get());
+
+	// create a nested callback for transformation
+	_cb->setNestedCallback(new osgART::TargetTransformCallback(target.get()));
+
+	// attach the callback to a transform
+	targetTrans->addUpdateCallback(_cb);
+
+   \endcode
+ */
+
+#ifndef OSGART_TARGETCALLBACK
+#define OSGART_TARGETCALLBACK 1
+
+// std include
+
+// OpenThreads include
+
+// OSG include
+#include <osg/NodeCallback>
+#include <osg/Timer>
+
+// local include
+#include "osgART/Export"
+#include "osgART/BaseCallback"
+#include "osgART/Target"
+
+
+namespace osgART
+{
+
+	/**
+	 * Creates and attaches a callback chain for a target to
+	 * a node. This binds the target to the node. This will attach a
+	 * osgART::TargetTransformCallback and a osgART::TargetVisibilityCallback
+	 *
+	 * \param node Node which should be mapped to a target
+	 * \param target Target which provides visibility and transformation information
+	 */
+	OSGART_EXPORT void attachDefaultTargetCallbacks(osg::Node* node, Target *target);
+
+
+	class OSGART_EXPORT SingleTargetCallback : public osg::NodeCallback
+	{
+	public:
+
+		SingleTargetCallback(Target *target);
+
+		inline const Target* getTarget() const {
+			return m_target;
+		}
+
+	protected:
+
+		Target* m_target;
+
+	};
+
+	class OSGART_EXPORT DoubleTargetCallback : public osg::NodeCallback
+	{
+	public:
+
+		DoubleTargetCallback(Target *targeta, Target *targetb);
+
+	protected:
+
+		Target* m_targetA;
+		Target* m_targetB;
+
+	};
+
+
+	class OSGART_EXPORT TargetTransformCallback : public SingleTargetCallback
+	{
+
+	protected:
+		bool mEnabled;
+
+	public:
+
+		TargetTransformCallback(Target* target);
+
+
+
+		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+		void setEnabled(bool e);
+		bool getEnabled();
+
+
+	};
+
+
+	class OSGART_EXPORT TargetVisibilityCallback : public SingleTargetCallback
+	{
+	public:
+
+		enum VisibilityMode {
+			VISIBILITY_NORMAL,		// Normal behavior: hide when target not tracked
+			VISIBILITY_TIMEOUT,		// Timeout: keep visible for n milliseconds after tracking lost
+			VISIBILITY_ALWAYS,		// Always: keep visible always
+			VISIBILITY_NEVER		// Never: keep hidden
+
+		};
+
+		TargetVisibilityCallback(Target* target);
+
+		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+
+		void setVisibilityMode(VisibilityMode mode);
+		VisibilityMode getVisibilityMode();
+
+		void setMillisecondsToKeepVisible(double ms);
+		double getMillisecondsToKeepVisible();
+
+		bool isVisible();
+
+	protected:
+
+		VisibilityMode m_visibilityMode;
+		double m_millisecondsToKeepVisible;
+
+		bool m_isVisible;
+
+		osg::Timer m_timer;
+
+	};
+
+	class OSGART_EXPORT MatrixOffsetCallback : public osg::NodeCallback
+	{
+
+	protected:
+		osg::Matrix _offset;
+
+	public:
+		MatrixOffsetCallback(osg::Matrix offset = osg::Matrix::identity());
+
+		void setupReflection(bool flipX, bool flipY);
+
+		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+	};
+
+
+
+	class OSGART_EXPORT TargetDebugCallback : public SingleTargetCallback
+	{
+	public:
+		TargetDebugCallback(Target* target);
+
+		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+	};
+
+
+	class OSGART_EXPORT LocalTransformationCallback : public DoubleTargetCallback
+	{
+	public:
+		LocalTransformationCallback(Target* base, Target* paddle);
+
+		virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+	};
+
+}
+
+#endif // OSGART_TARGETCALLBACK
+

@@ -1,0 +1,218 @@
+/* -*-c++-*- 
+ * 
+ * osgART - Augmented Reality ToolKit for OpenSceneGraph
+ * 
+ * Copyright (C) 2005-2009 Human Interface Technology Laboratory New Zealand
+ * Copyright (C) 2010-2014 Raphael Grasset, Julian Looser, Hartmut Seichter
+ *
+ * This library is open source and may be redistributed and/or modified under
+ * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
+ * (at your option) any later version.  The full license is in LICENSE file
+ * included with this distribution, and on the osgart.org website.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * OpenSceneGraph Public License for more details.
+*/
+
+/**
+ *  \file  Tracker
+ *  \brief Base class for tracker class
+ *
+ * A Tracker generate targets and get input sensors or video information.
+ */
+
+#ifndef OSGART_TRACKER
+#define OSGART_TRACKER 1
+
+// std include
+#include <map>
+#include <iostream>
+
+// OpenThreads include
+
+// OSG include
+#include <osg/Geometry>
+#include <osg/Projection>
+
+// local include
+#include "osgART/Export"
+#include "osgART/Object"
+#include "osgART/Event"
+#include "osgART/Field"
+
+#include "osgART/Video"
+#include "osgART/Target"
+#include "osgART/TrackerConfiguration"
+#include "osgART/CameraConfiguration"
+
+#include "osgART/TrackerTrainingSupport"
+
+namespace osgART {
+
+	/* Forward declaration */
+	class VideoLayer;
+
+	/**
+	 * \class Tracker.
+	 *
+	 * Base class for a tracker which in the context of AR is an entity
+	 * that connects video streams, targets and their representation in
+	 * the virtual environment.
+	 */
+    class OSGART_EXPORT Tracker : public osgART::Object, 
+    							  public FieldContainer<Tracker>
+    {
+	public:
+
+        META_Object(osgART,Tracker)
+
+        /**
+         * @brief some traits to know how the tracker behaves
+         */
+        enum Traits {
+            NoTraits        = 0,                ///< nothing
+            SensorTracker   = (1 << 1),         ///< a sensor tracker
+            VisionTracker   = (1 << 2),         ///< this is a general vision tracker
+            FusionTracker   = (1 << 3),         ///< fusion tracker (does internal fusion of sensors and vision)
+            ProvidesVideo   = (1 << 4),         ///< tracker provides its own video support
+            ProvidesSensors = (1 << 5)          ///< tracker provides its own sensor support
+        };
+
+		/** 
+		 * Default constructor. Initializes also the FieldContainer 
+		 * explicitly.
+		 */
+		Tracker();
+
+		/** 
+		 * Copy constructor. Needed for cloning in OSG
+		 */
+        Tracker(const Tracker& container, const osg::CopyOp& co = osg::CopyOp::SHALLOW_COPY);
+
+		/** 
+		 * \brief assignemnt operator.
+		 *
+		 */
+		Tracker& operator = (const Tracker &);
+		
+		/**
+		 * Needed for plugin loaded objects which are used in other
+		 * languages which don't support dynamic casting (e.g. Python)
+		 * \param instance instance to be casted
+		 * \return 0 if can't cast otherwise correctly typed instance
+		 */
+		static Tracker* cast(osg::Referenced* instance);
+		
+		 /**
+		 * Access a field by its name. You need to cast
+		 * the field into its respective type in order
+		 * to access it.
+		 * \param name Name of the field
+		 * \return pointer to the field (0L if not found)
+		 */
+		Field* get(const std::string& name);
+				
+		/**
+		 * Get the tracker configuration struct
+		 * \return struct TrackerConfiguration
+		 */
+		virtual TrackerConfiguration* getOrCreateConfiguration();
+		
+		/**
+		 * Set the tracker configuration struct
+		 * \param TrackerConfiguration tracker configuration
+		*/
+		virtual void setConfiguration(TrackerConfiguration* config);		
+
+		/**
+		 * \brief get the traits of the tracker
+		 * 
+		 * \return flags comprising of Traits
+		 */
+        virtual Traits getTraits();
+		
+		/**
+		 * Creates or gets the Camera Configuration object
+		 *
+		 * \return Camera Configuration object
+		 */
+		virtual CameraConfiguration* getOrCreateCameraConfiguration();
+
+		/**
+		 * set Camera Configuration object
+		 *
+		 * \param CameraConfiguration config object
+		 */
+		virtual void setCameraConfiguration(CameraConfiguration* config);
+
+		/**
+		 * \brief return a target object.
+		 *
+		 * get a target in the list of managed target by the tracker.
+		 */
+		virtual Target* getTarget(size_t idx=0);
+
+		inline size_t
+		getTargetNum() const { return _targetList.size(); }
+
+		/**
+		 * Add a target to the tracker.
+		 * \param config can contain the filename an ID or other tracker specific parameters
+		 * \return Target as been loaded from the tracker or 0 if it failed
+		 */
+		virtual Target* addTarget(const std::string& config="");
+
+		/**
+		 * Remove a target.
+		 * \param target pointer to the target to be removed
+		 */
+        virtual void removeTarget(Target* target);
+		
+		/**
+		 * \brief removes all targets from the tracker (all callbacks will be removed as well)
+		 */
+		 virtual void removeAllTargets();
+
+		/**
+		 * Return a training support instance for this tracker.
+		 * \return TrackerTrainingSupport instance, or NULL if target training is not supported.
+		 */
+		virtual TrackerTrainingSupport* getTrainingSupport() { return NULL; }
+
+
+	protected:
+
+		/**
+		 * \brief destructor.
+		 */
+		virtual ~Tracker();
+					
+		/**
+		 * type for a vector of reference counted targets.
+		 */
+        typedef std::vector< osg::ref_ptr<Target> > TargetListType;
+
+		/**
+		 * A list of targets associated with this tracker.
+		 */
+        TargetListType _targetList;
+
+		/**
+		 * Camera Configuration object that encapsulates the intrinsic camera parameters and distortion parameters.
+		 */
+		osg::ref_ptr<CameraConfiguration> _cameraConfiguration;
+
+		/**
+		 * Tracker Configuration object that encapsulates the initialization parameters.
+		 */
+		osg::ref_ptr<TrackerConfiguration> _trackerConfiguration;
+
+		osg::Matrix		_projectionMatrix;//use to store intrinsics parameters from CameraConfiguration
+
+	}; // class Tracker
+
+} // namespace osgART
+
+#endif // OSGART_TRACKER
