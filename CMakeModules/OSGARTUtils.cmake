@@ -15,14 +15,21 @@ endmacro(osgart_folder)
 
 macro(install_osgart_plugin target)
 
-	get_target_property(plugin_file ${target} LOCATION)
+	# the LOCATION property was removed (CMP0026); use a generator expression
+	set(plugin_file "$<TARGET_FILE:${target}>")
 
 	set(OSGART_FILES_PLUGINS ${OSGART_FILES_PLUGINS} ${plugin_file})
 	
 	#message(STATUS "\naa----------------\n${OSGART_FILES_PLUGINS}")
 	
 
-	set(lib_libinstalldir ${OSGART_LIB_PREFIX})
+	# OSGART_LIB_PREFIX is not set anywhere; fall back to 'lib' so the
+	# destination stays relative to CMAKE_INSTALL_PREFIX
+	if(OSGART_LIB_PREFIX)
+		set(lib_libinstalldir ${OSGART_LIB_PREFIX})
+	else()
+		set(lib_libinstalldir lib)
+	endif()
 	
 	if(APPLE)
 		set(lib_libinstalldir ${CMAKE_INSTALL_PREFIX}/lib/)	
@@ -70,7 +77,8 @@ endmacro(osgart_get_data)
 
 macro(install_osgart_example target)
 
-	get_target_property(exe_file ${target} LOCATION)
+	# the LOCATION property was removed (CMP0026); use a generator expression
+	set(exe_file "$<TARGET_FILE:${target}>")
 	
 	#message(STATUS "Plugins: ${OSGART_FILES_PLUGINS}")
 	
@@ -85,20 +93,12 @@ macro(install_osgart_example target)
 			)
 	endif(APPLE)
 	
-	if    (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS "2.6")
-		install(TARGETS ${target} 
-				RUNTIME DESTINATION bin
-				LIBRARY DESTINATION ${lib_libinstalldir}
-				ARCHIVE DESTINATION lib
-				)
-	else  (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS "2.6")
-		install(TARGETS ${target} 
-				RUNTIME DESTINATION bin
-				LIBRARY DESTINATION ${lib_libinstalldir}
-				ARCHIVE DESTINATION lib
-				BUNDLE DESTINATION /Applications
-				)
-	endif (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS "2.6")
+	install(TARGETS ${target}
+			RUNTIME DESTINATION bin
+			LIBRARY DESTINATION ${lib_libinstalldir}
+			ARCHIVE DESTINATION lib
+			BUNDLE DESTINATION /Applications
+			)
 
 endmacro(install_osgart_example target)
 

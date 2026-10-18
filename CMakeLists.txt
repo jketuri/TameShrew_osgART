@@ -3,7 +3,7 @@
 # ==============================
 
 # CMake version
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.5...4.3)
 
 # ==== Global Configuration ====
 
@@ -141,7 +141,7 @@ endif()
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/cmake_uninstall.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY)
+  @ONLY)
 
 add_custom_target(uninstall
   "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
@@ -157,7 +157,7 @@ if(OSGART_BUILD_PACKAGE)
 	configure_file(
 		${CMAKE_SOURCE_DIR}/CMakeModules/Packaging.cmake.in
 		${CMAKE_BINARY_DIR}/.cpack/OSGARTPackaging.cmake
-		@ONLY IMMEDIATE
+		@ONLY
 	)
 	include(${CMAKE_BINARY_DIR}/.cpack/OSGARTPackaging.cmake)
 endif()

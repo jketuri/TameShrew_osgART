@@ -54,7 +54,7 @@ namespace osgART {
 
 	   if (!node || !cb) return;    // Sanity check
 
-	   osg::NodeCallback* n = node->getEventCallback();
+	   osg::Callback* n = node->getEventCallback();
 	   if (!n) return;                // There is no callback list
 
 	   // Check the first callback
@@ -67,7 +67,7 @@ namespace osgART {
 	   // Check nested callbacks
 	   while (n) {
 
-		   osg::NodeCallback* nested = n->getNestedCallback();
+		   osg::Callback* nested = n->getNestedCallback();
 		   if (!nested) return;        // Run out of children
 
 		   if (nested == cb) {

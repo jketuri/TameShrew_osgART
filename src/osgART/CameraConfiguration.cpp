@@ -66,7 +66,7 @@ CameraConfiguration::observedToIdeal(
 	int loop) {
 
     double  z02, z0, p, q, z, px, py;
-    register int i = 0;
+    int i = 0;
 
     px = ox - dist_factor[0];
     py = oy - dist_factor[1];
